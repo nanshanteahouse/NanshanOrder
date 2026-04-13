@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭点菜系统</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <header class="navbar">
+            <div class="logo"><h1>家庭点菜系统</h1></div>
+            <div class="header-actions">
+                <div class="icon-btn" @click="toggleTheme" :title="isDarkMode ? '切换日间模式' : '切换夜间模式'">
+                    {{ isDarkMode ? '🌙' : '☀️' }}
+                </div>
+                <div class="icon-btn" @click="toggleSettings" title="偏好设置">⚙️</div>
+                <div class="cart-toggle" @click="toggleCart">
+                    🛒 购物车 <span class="badge" v-if="cartTotalItems > 0">{{ cartTotalItems }}</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="menu-view">
+                <aside class="categories">
+                    <ul>
+                        <li v-for="cat in categories" :key="cat.name" @click="selectedCategory = cat.name" :class="{ active: selectedCategory === cat.name }">
+                            {{ cat.icon }} {{ cat.displayName }}
+                        </li>
+                    </ul>
+                </aside>
+
+                <section class="dishes-grid">
+                    <div v-for="dish in filteredDishes" :key="dish.id" class="dish-card" :class="{ disabled: !isDishAvailable(dish) && !settings.allowOutOfStock, conflict: hasConflict(dish) }">
+                        <div class="dish-img-placeholder" v-if="!dish.image">{{ getCategoryIcon(dish.categoryName) }}</div>
+                        <img v-else :src="'images/' + dish.image" :alt="dish.displayName" @error="handleImageError">
+                        <div class="dish-info">
+                            <div class="dish-header">
+                                <h3>{{ dish.displayName }}</h3>
+                                <p class="price">¥{{ dish.price }}</p>
+                            </div>
+                            <p class="desc">{{ dish.description }}</p>
+                            <div class="dish-footer">
+                                <div class="tags">
+                                    <span v-if="!isDishAvailable(dish)" class="tag out-of-stock">缺货</span>
+                                    <span v-if="hasConflict(dish)" class="tag conflict-tag">含忌口</span>
+                                </div>
+                                <button class="add-btn-circle" :disabled="!isDishAvailable(dish) && !settings.allowOutOfStock" @click="openDishDetail(dish)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <div class="modal-overlay" v-if="isSettingsOpen" @click.self="toggleSettings">
+            <div class="modal-content settings-modal">
+                <div class="modal-header"><h2>⚙️ 偏好设置</h2><button class="close-btn" @click="toggleSettings">×</button></div>
+                <div class="modal-body">
+                    <section class="setting-group">
+                        <h3>点餐控制</h3>
+                        <label class="modern-checkbox"><input type="checkbox" v-model="settings.allowOutOfStock"><span class="checkmark"></span>允许加购库存不足的菜品</label>
+                        <label class="modern-checkbox"><input type="checkbox" v-model="settings.allowFlavorConflict"><span class="checkmark"></span>允许加购包含忌口的菜品</label>
+                    </section>
+                    <section class="setting-group">
+                        <h3>饮食忌口过滤</h3>
+                        <div class="allergy-tags">
+                            <label v-for="mapping in ingredientMappings" :key="mapping.tag" class="pill-checkbox">
+                                <input type="checkbox" :value="mapping.tag" v-model="settings.dislikedTags"><span>{{ mapping.displayName }}</span>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+                <div class="modal-actions full-width"><button class="action-btn primary" @click="saveSettings">保存偏好</button></div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" v-if="selectedDish" @click.self="selectedDish = null">
+            <div class="modal-content">
+                <div class="modal-header"><h2>{{ selectedDish.displayName }}</h2><button class="close-btn" @click="selectedDish = null">×</button></div>
+                <div class="modal-body">
+                    <div class="ingredients-list">
+                        <span class="text-sub">主要食材：</span>
+                        <span v-for="ing in selectedDish.ingredients" :key="ing" class="ingredient-tag">{{ getIngredientDisplayName(ing) }}</span>
+                    </div>
+                    <div class="flavor-options">
+                        <div v-for="(config, flavorKey) in selectedDish.flavorOptions" :key="flavorKey" class="option-group">
+                            <h4 class="flavor-title">{{ getFlavorDisplayName(flavorKey) }}</h4>
+                            <div v-if="getFlavorType(flavorKey) === 'multiple'" class="flavor-pills">
+                                <button v-for="opt in getFlavorOptionsList(flavorKey)" :key="opt" class="pill-btn" :class="{ active: currentDishFlavors[flavorKey] && currentDishFlavors[flavorKey].includes(opt) }" @click="toggleMultiple(flavorKey, opt)">{{ opt }}</button>
+                            </div>
+                            <div v-else-if="getFlavorType(flavorKey) === 'single' && getFlavorOptionsList(flavorKey).length === 2" class="flavor-switch-container">
+                                <span class="switch-option" :class="{ active: currentDishFlavors[flavorKey] === getFlavorOptionsList(flavorKey)[1] }" @click="currentDishFlavors[flavorKey] = getFlavorOptionsList(flavorKey)[1]">{{ getFlavorOptionsList(flavorKey)[1] }}</span>
+                                <div class="ios-switch" :class="{ active: currentDishFlavors[flavorKey] === getFlavorOptionsList(flavorKey)[0] }" @click="toggleTwoOption(flavorKey)"><div class="ios-switch-knob"></div></div>
+                                <span class="switch-option" :class="{ active: currentDishFlavors[flavorKey] === getFlavorOptionsList(flavorKey)[0] }" @click="currentDishFlavors[flavorKey] = getFlavorOptionsList(flavorKey)[0]">{{ getFlavorOptionsList(flavorKey)[0] }}</span>
+                            </div>
+                            <div v-else class="flavor-pills">
+                                <button v-for="opt in getFlavorOptionsList(flavorKey)" :key="opt" class="pill-btn" :class="{ active: currentDishFlavors[flavorKey] === opt }" @click="currentDishFlavors[flavorKey] = opt">{{ opt }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions"><button class="action-btn primary full-width" @click="confirmAddToCart">加入购物车 - ¥{{ selectedDish.price }}</button></div>
+            </div>
+        </div>
+
+        <div class="cart-sidebar" :class="{ open: isCartOpen }">
+            <div class="cart-header"><h2>购物车</h2><button class="close-btn" @click="toggleCart">×</button></div>
+            <div class="cart-items">
+                <div v-if="cart.length === 0" class="empty-cart">购物车空空如也</div>
+                <div v-for="(item, index) in cart" :key="index" class="cart-item" :class="{ 'conflict-item': hasConflict(item.dish) }">
+                    <div class="item-main">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h4>{{ item.dish.displayName }}</h4>
+                            <span v-if="hasConflict(item.dish)" class="status-badge danger" style="font-size: 10px; padding: 2px 6px;">含忌口</span>
+                        </div>
+                        <p class="price">¥{{ item.dish.price }}</p>
+                    </div>
+                    <div class="item-flavors">
+                        <span v-for="(val, key) in item.flavors" :key="key">{{ getFlavorDisplayName(key) }}: {{ formatFlavor(val) }}</span>
+                    </div>
+                    <div class="item-controls">
+                        <button class="qty-btn" @click="updateCartQuantity(index, -1)">-</button><span class="qty-num">{{ item.quantity }}</span><button class="qty-btn" @click="updateCartQuantity(index, 1)">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="cart-footer">
+                <div class="cart-remark-box"><textarea class="modern-input w-full" v-model="cartRemark" placeholder="✍️ 添加整单备注" rows="2"></textarea></div>
+                <div class="total"><span class="text-sub">总计</span><span class="total-price">¥{{ cartTotalPrice }}</span></div>
+                <div v-if="cartHasConflict && !settings.allowFlavorConflict" class="cart-warning">⚠️ 存在包含忌口的菜品，无法提交</div>
+                <button class="checkout-btn" :disabled="cartHasConflict && !settings.allowFlavorConflict" @click="checkout">提交订单 / 复制信息</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>

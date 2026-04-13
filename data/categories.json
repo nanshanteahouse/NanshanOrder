@@ -1,0 +1,29 @@
+{
+  "categories": [
+    {
+      "name": "stirfry",
+      "displayName": "炒菜",
+      "icon": "🍳"
+    },
+    {
+      "name": "cold_dish",
+      "displayName": "凉菜",
+      "icon": "🥒"
+    },
+    {
+      "name": "soup",
+      "displayName": "汤类",
+      "icon": "🍲"
+    },
+    {
+      "name": "staple",
+      "displayName": "主食",
+      "icon": "🍚"
+    },
+    {
+      "name": "beverage",
+      "displayName": "饮料",
+      "icon": "🥤"
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统管理后台 - 家庭点菜</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        :root {
+            --admin-bg: #FDFBF7; --admin-surface: #FFFFFF; --admin-text: #2C3E50; --admin-text-sub: #7F8C8D;
+            --admin-border: #EAEAEA; --admin-hover: #F8F9FA; --status-good: #27AE60; --status-good-bg: #E8F8F5;
+            --status-warn: #E67E22; --status-warn-bg: #FEF5E7; --status-danger: #E74C3C; --status-danger-bg: #FDEDEC;
+        }
+        [data-theme="dark"] {
+            --admin-bg: #121212; --admin-surface: #1E1E1E; --admin-text: #E0E0E0; --admin-text-sub: #9E9E9E;
+            --admin-border: #333333; --admin-hover: #2C2C2C; --status-good-bg: rgba(39, 174, 96, 0.2);
+            --status-warn-bg: rgba(230, 126, 34, 0.2); --status-danger-bg: rgba(231, 76, 60, 0.2);
+        }
+        body { background-color: var(--admin-bg); color: var(--admin-text); margin: 0; font-family: "Noto Sans SC", sans-serif; }
+        
+        .admin-topbar { background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 var(--space-lg); height: 60px; box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 100; }
+        .admin-topbar .logo { font-family: "Noto Serif SC", serif; font-size: 20px; font-weight: 700; margin-right: var(--space-xl); white-space: nowrap; }
+        .admin-nav { display: flex; gap: var(--space-sm); flex: 1; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .admin-nav-item { padding: 8px 16px; cursor: pointer; border-radius: 6px; font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.8); transition: 0.2s; white-space: nowrap; flex-shrink: 0; }
+        .admin-nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .admin-nav-item.active { background: white; color: var(--primary-color); font-weight: 700; }
+        
+        .admin-actions { display: flex; gap: var(--space-sm); align-items: center; flex-shrink: 0; }
+        .save-badge { background: var(--status-warn); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; animation: pulse 2s infinite; white-space: nowrap; }
+        
+        .admin-main { padding: var(--space-lg) var(--space-xl); max-width: 1440px; margin: 0 auto; }
+        .toolbar { display: flex; justify-content: space-between; margin-bottom: var(--space-md); align-items: center; flex-wrap: wrap; gap: 16px; }
+        .filter-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; flex: 1; justify-content: flex-end; }
+        
+        .batch-toolbar { background-color: var(--status-good-bg); border: 1px solid var(--primary-color); padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; animation: slideDown 0.2s ease-out; flex-wrap: wrap; gap: 10px; }
+        
+        .admin-table-card { background: var(--admin-surface); border-radius: 8px; box-shadow: var(--shadow-sm); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 800px; /* 保证表格在窄屏下不被无限压缩导致换行 */ }
+        .admin-table th { background: var(--admin-hover); padding: 12px 16px; text-align: left; color: var(--admin-text-sub); font-weight: 500; border-bottom: 2px solid var(--admin-border); white-space: nowrap; }
+        .admin-table td { padding: 12px 16px; border-bottom: 1px solid var(--admin-border); vertical-align: middle; }
+        .admin-table tr:hover td { background-color: var(--admin-hover); }
+        
+        .status-pill { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .status-pill.good { background: var(--status-good-bg); color: var(--status-good); }
+        .status-pill.warn { background: var(--status-warn-bg); color: var(--status-warn); }
+        .status-pill.danger { background: var(--status-danger-bg); color: var(--status-danger); }
+        
+        .admin-modal-body { padding: var(--space-lg); max-height: 70vh; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-md); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-item { display: flex; flex-direction: column; gap: 6px; }
+        .form-item label { font-size: 13px; color: var(--admin-text-sub); font-weight: 600; }
+        .form-item.full-width { grid-column: 1 / -1; }
+        
+        .modern-input, .modern-select, .code-textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--admin-border); border-radius: 6px; font-size: 14px; color: var(--admin-text); background-color: var(--admin-surface); transition: 0.2s; font-family: inherit; line-height: 1.5; }
+        .modern-input:focus, .modern-select:focus, .code-textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(45,90,39,0.1); outline: none; }
+        .code-textarea { font-family: 'Courier New', Courier, monospace; font-size: 13px; resize: vertical; min-height: 80px; }
+
+        .checkbox-cell { width: 40px; text-align: center; }
+        .drag-handle { cursor: grab; color: #BDC3C7; font-size: 18px; padding-right: 8px; user-select: none; }
+        .drag-handle:active { cursor: grabbing; color: var(--primary-color); }
+        .drag-handle.disabled { cursor: not-allowed; opacity: 0.3; }
+        .draggable-row { transition: background-color 0.2s; }
+        .draggable-row.drag-over { background-color: var(--status-good-bg) !important; }
+        .ingredient-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; border: 1px solid var(--admin-border); padding: 16px; border-radius: 6px; max-height: 200px; overflow-y: auto; background: var(--admin-hover); }
+        .ingredient-label { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; user-select: none; color: var(--admin-text); }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 后台专属移动端样式覆盖 */
+        @media (max-width: 768px) {
+            .admin-topbar { flex-wrap: wrap; height: auto; padding: 10px; gap: 10px; justify-content: center; }
+            .admin-topbar .logo { margin: 0; width: 100%; text-align: center; }
+            .admin-nav { width: 100%; padding-bottom: 5px; }
+            .admin-actions { width: 100%; justify-content: center; flex-wrap: wrap; gap: 8px; }
+            .admin-actions .action-btn { padding: 6px 12px; font-size: 12px; }
+            .admin-main { padding: 12px; }
+            .filter-group { flex-direction: column; align-items: stretch; width: 100%; }
+            .filter-group input, .filter-group select, .filter-group button { width: 100% !important; margin-left: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="admin-app" v-cloak>
+        <header class="admin-topbar">
+            <div class="logo">后台管理</div>
+            <nav class="admin-nav">
+                <div v-for="tab in tabs" :key="tab.id" class="admin-nav-item" :class="{active: currentTab === tab.id}" @click="currentTab = tab.id">
+                    {{ tab.icon }} {{ isMobile ? '' : tab.name }}
+                </div>
+            </nav>
+            <div class="admin-actions">
+                <div class="icon-btn" @click="toggleTheme" :title="isDarkMode ? '日间模式' : '夜间模式'" style="color: white; font-size: 18px; cursor: pointer;">
+                    {{ isDarkMode ? '🌙' : '☀️' }}
+                </div>
+                <span v-if="isDirty" class="save-badge">未保存</span>
+                <button class="action-btn" style="background: white; color: var(--primary-color);" @click="saveToServer">💾 {{ isMobile ? '保存' : '保存全部' }}</button>
+                <div v-if="!isMobile" style="width: 1px; height: 24px; background: rgba(255,255,255,0.3); margin: 0 4px;"></div>
+                <button class="action-btn outline" style="color: white; border-color: rgba(255,255,255,0.5);" @click="exportAllJSON">📤 {{ isMobile ? '导出' : '导出JSON' }}</button>
+                <button class="action-btn outline" style="color: white; border-color: rgba(255,255,255,0.5);" @click="$refs.fileInput.click()">📥 {{ isMobile ? '导入' : '导入数据' }}</button>
+                <input type="file" ref="fileInput" style="display: none;" accept=".json" @change="importJSON">
+                <a href="/" class="action-btn outline" style="color: white; border-color: rgba(255,255,255,0.5); text-decoration: none;">🏠 {{ isMobile ? '前台' : '返回前台' }}</a>
+            </div>
+        </header>
+
+        <main class="admin-main">
+            <div class="toolbar">
+                <h2 style="margin: 0; font-family: 'Noto Serif SC', serif; font-size: 18px;">{{ currentTabObj.title }}</h2>
+                <div class="filter-group">
+                    <input type="text" class="modern-input" v-model="filters[currentTab].search" placeholder="🔍 搜索关键字..." style="width: 180px;">
+                    <template v-if="currentTab === 'dishes'">
+                        <select class="modern-select" v-model="filters.dishes.category" style="width: 140px;">
+                            <option value="">所有分类</option>
+                            <option v-for="cat in db.categories" :key="cat.name" :value="cat.name">{{ cat.displayName }}</option>
+                        </select>
+                        <select class="modern-select" v-model="filters.dishes.ingredient" style="width: 140px;">
+                            <option value="">所有食材</option>
+                            <option v-for="ing in db.ingredients" :key="ing.name" :value="ing.name">{{ ing.displayName }}</option>
+                        </select>
+                    </template>
+                    <template v-else-if="currentTab === 'inventory'">
+                        <select class="modern-select" v-model="filters.inventory.tag" style="width: 140px;">
+                            <option value="">所有类别</option>
+                            <option v-for="tag in ingredientTags" :key="tag" :value="tag">{{ tag }}</option>
+                        </select>
+                        <select class="modern-select" v-model="filters.inventory.status" style="width: 140px;">
+                            <option value="">所有状态</option>
+                            <option value="good">🟢 充足</option>
+                            <option value="warn">🟠 需补货</option>
+                            <option value="danger">🔴 已售罄</option>
+                        </select>
+                    </template>
+                    <template v-else-if="currentTab === 'ingredients'">
+                        <select class="modern-select" v-model="filters.ingredients.tag" style="width: 140px;">
+                            <option value="">所有标签</option>
+                            <option v-for="tag in ingredientTags" :key="tag" :value="tag">{{ tag }}</option>
+                        </select>
+                    </template>
+                    <button class="action-btn primary" @click="openEditModal(null)" style="margin-left: 8px;">+ {{ isMobile ? '新增' : '新增记录' }}</button>
+                </div>
+            </div>
+
+            <div class="batch-toolbar" v-if="selectedItems.length > 0">
+                <span style="font-weight: 600; color: var(--primary-color); font-size: 14px;">已选择 {{ selectedItems.length }} 项数据</span>
+                <button class="action-btn danger-btn" @click="batchDelete">🗑️ 批量删除</button>
+            </div>
+
+            <div class="admin-table-card">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th width="40" title="拖拽排序">序</th>
+                            <th class="checkbox-cell"><label class="modern-checkbox"><input type="checkbox" :checked="isAllSelected" @change="toggleSelectAll"><span class="checkmark"></span></label></th>
+                            <th v-for="col in currentTabObj.columns" :key="col.key" :width="col.width">{{ col.label }}</th>
+                            <th width="80">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-if="filteredData.length === 0"><td :colspan="currentTabObj.columns.length + 3" style="text-align: center; padding: 32px; color: var(--admin-text-sub);">未找到符合条件的数据</td></tr>
+                        <tr v-for="(item, index) in filteredData" :key="item.id || item.name || item.tag" :draggable="!isListFiltered" @dragstart="onDragStart(index)" @dragover.prevent="onDragOver(index)" @drop="onDrop(index)" class="draggable-row" :class="{'drag-over': dragOverIndex === index}">
+                            <td class="drag-handle" :class="{'disabled': isListFiltered}">☰</td>
+                            <td class="checkbox-cell"><label class="modern-checkbox"><input type="checkbox" :value="item" v-model="selectedItems"><span class="checkmark"></span></label></td>
+                            <td v-for="col in currentTabObj.columns" :key="col.key">
+                                <template v-if="col.type === 'status'"><span class="status-pill" :class="getInventoryStatus(item).class">{{ getInventoryStatus(item).text }}</span></template>
+                                <template v-else-if="col.type === 'array'"><span style="font-size: 12px; color: var(--admin-text-sub);">{{ item[col.key] && item[col.key].length > 0 ? item[col.key].join(', ') : '无' }}</span></template>
+                                <template v-else-if="col.type === 'json'"><span style="font-size: 12px; color: var(--admin-text-sub);">{{ Object.keys(item[col.key] || {}).length }} 项配置</span></template>
+                                <template v-else-if="col.type === 'computed_ing_name'"><strong>{{ getIngredientDisplayName(item.name) }}</strong></template>
+                                <template v-else><strong v-if="col.key === 'displayName' || col.key === 'id' || col.key === 'name'">{{ item[col.key] }}</strong><span v-else>{{ item[col.key] }}</span></template>
+                            </td>
+                            <td><button class="action-btn secondary" style="padding: 4px 10px; font-size: 12px;" @click="openEditModal(item)">编辑</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <div class="modal-overlay" v-if="isModalOpen" @click.self="closeEditModal">
+            <div class="modal-content" style="max-width: 650px; width: 90%; background: var(--admin-surface); color: var(--admin-text);">
+                <div class="modal-header">
+                    <h2 style="font-size: 18px; margin: 0;">{{ editingItem._isNew ? '新增' : '编辑' }} {{ currentTabObj.name }}</h2>
+                    <button class="close-btn" @click="closeEditModal">×</button>
+                </div>
+                <div class="admin-modal-body">
+                    <div class="form-grid">
+                        <div v-for="field in currentTabObj.formFields" :key="field.key" class="form-item" :class="{'full-width': field.fullWidth}">
+                            <label>{{ field.label }} <span v-if="field.required" style="color: var(--danger-color);">*</span></label>
+                            <input v-if="field.type === 'text' || field.type === 'number'" :type="field.type" class="modern-input" v-model="editingItem[field.key]" :placeholder="field.placeholder">
+                            <textarea v-else-if="field.type === 'textarea'" class="modern-input" v-model="editingItem[field.key]" rows="3"></textarea>
+                            <select v-else-if="field.type === 'categorySelect'" class="modern-select" v-model="editingItem[field.key]">
+                                <option value="" disabled>请选择分类</option>
+                                <option v-for="cat in db.categories" :key="cat.name" :value="cat.name">{{ cat.displayName }}</option>
+                            </select>
+                            <select v-else-if="field.type === 'flavorTypeSelect'" class="modern-select" v-model="editingItem[field.key]">
+                                <option value="single">单选 (single)</option><option value="multiple">多选 (multiple)</option>
+                            </select>
+                            <div v-else-if="field.type === 'ingredientMultiSelect'" class="ingredient-selector">
+                                <label v-for="ing in db.ingredients" :key="ing.name" class="ingredient-label">
+                                    <input type="checkbox" :value="ing.name" v-model="editingItem[field.key]"> {{ ing.displayName }}
+                                </label>
+                            </div>
+                            <textarea v-else-if="field.type === 'jsonRaw'" class="code-textarea" :value="JSON.stringify(editingItem[field.key], null, 2)" @change="handleJsonInput(field.key, $event.target.value)" rows="5"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions" style="justify-content: flex-end; padding: 16px; background: var(--admin-hover); border-top: 1px solid var(--admin-border);">
+                    <button class="action-btn outline" @click="closeEditModal">取消</button>
+                    <button class="action-btn primary" @click="saveModalItem">确定保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/admin.js"></script>
+</body>
+</html>

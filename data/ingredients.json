@@ -1,0 +1,269 @@
+{
+  "ingredients": [
+    {
+      "name": "pork",
+      "displayName": "猪肉",
+      "tag": "肉类"
+    },
+    {
+      "name": "pork_belly",
+      "displayName": "五花肉",
+      "tag": "肉类"
+    },
+    {
+      "name": "lard",
+      "displayName": "猪油",
+      "tag": "肉类"
+    },
+    {
+      "name": "beef",
+      "displayName": "牛肉",
+      "tag": "肉类"
+    },
+    {
+      "name": "chicken",
+      "displayName": "鸡肉",
+      "tag": "肉类"
+    },
+    {
+      "name": "egg",
+      "displayName": "鸡蛋",
+      "tag": "蛋奶类"
+    },
+    {
+      "name": "milk",
+      "displayName": "牛奶",
+      "tag": "蛋奶类"
+    },
+    {
+      "name": "cream",
+      "displayName": "奶油",
+      "tag": "蛋奶类"
+    },
+    {
+      "name": "cheese",
+      "displayName": "芝士",
+      "tag": "蛋奶类"
+    },
+    {
+      "name": "yogurt",
+      "displayName": "酸奶",
+      "tag": "蛋奶类"
+    },
+    {
+      "name": "butter",
+      "displayName": "黄油",
+      "tag": "蛋奶类"
+    },
+    {
+      "name": "flour",
+      "displayName": "面粉",
+      "tag": "主食类"
+    },
+    {
+      "name": "rice",
+      "displayName": "米饭",
+      "tag": "主食类"
+    },
+    {
+      "name": "noodles",
+      "displayName": "面条",
+      "tag": "主食类"
+    },
+    {
+      "name": "shrimp",
+      "displayName": "虾",
+      "tag": "海鲜类"
+    },
+    {
+      "name": "crab",
+      "displayName": "蟹",
+      "tag": "海鲜类"
+    },
+    {
+      "name": "shellfish",
+      "displayName": "贝类",
+      "tag": "海鲜类"
+    },
+    {
+      "name": "fish",
+      "displayName": "鱼",
+      "tag": "海鲜类"
+    },
+    {
+      "name": "tofu",
+      "displayName": "豆腐",
+      "tag": "豆制品"
+    },
+    {
+      "name": "potato",
+      "displayName": "土豆",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "tomato",
+      "displayName": "番茄",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "cabbage",
+      "displayName": "白菜",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "lettuce",
+      "displayName": "生菜",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "carrot",
+      "displayName": "胡萝卜",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "onion",
+      "displayName": "洋葱",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "garlic",
+      "displayName": "大蒜",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "green_pepper",
+      "displayName": "青椒",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "red_pepper",
+      "displayName": "红椒",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "chili",
+      "displayName": "辣椒",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "ginger",
+      "displayName": "姜",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "green_onion",
+      "displayName": "葱",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "cilantro",
+      "displayName": "香菜",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "sucrose",
+      "displayName": "蔗糖",
+      "tag": "调味品"
+    },
+    {
+      "name": "honey",
+      "displayName": "蜂蜜",
+      "tag": "调味品"
+    },
+    {
+      "name": "coconut_milk",
+      "displayName": "椰奶",
+      "tag": "蛋奶类"
+    },
+    {
+      "name": "peanut",
+      "displayName": "花生",
+      "tag": "坚果类"
+    },
+    {
+      "name": "soy_sauce",
+      "displayName": "生抽",
+      "tag": "调味品"
+    },
+    {
+      "name": "salt",
+      "displayName": "盐",
+      "tag": "调味品"
+    },
+    {
+      "name": "oil",
+      "displayName": "食用油",
+      "tag": "调味品"
+    },
+    {
+      "name": "dark_soy_sauce",
+      "displayName": "老抽",
+      "tag": "调味品"
+    },
+    {
+      "name": "sesame_oil",
+      "displayName": "芝麻油",
+      "tag": "调味品"
+    },
+    {
+      "name": "vinegar",
+      "displayName": "醋",
+      "tag": "调味品"
+    },
+    {
+      "name": "broccoli",
+      "displayName": "西兰花",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "corn",
+      "displayName": "玉米",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "cucumber",
+      "displayName": "黄瓜",
+      "tag": "蔬菜类"
+    },
+    {
+      "name": "seaweed",
+      "displayName": "紫菜",
+      "tag": "海鲜类"
+    },
+    {
+      "name": "lemon",
+      "displayName": "柠檬",
+      "tag": "水果类"
+    },
+    {
+      "name": "orange",
+      "displayName": "橙子",
+      "tag": "水果类"
+    },
+    {
+      "name": "sesame",
+      "displayName": "芝麻",
+      "tag": "坚果类"
+    },
+    {
+      "name": "bubbles",
+      "displayName": "珍珠",
+      "tag": "饮品原料"
+    },
+    {
+      "name": "water",
+      "displayName": "水",
+      "tag": "饮品原料"
+    },
+    {
+      "name": "tea",
+      "displayName": "茶叶",
+      "tag": "饮品原料"
+    },
+    {
+      "name": "yeast",
+      "displayName": "酵母",
+      "tag": "其他"
+    }
+  ]
+}
