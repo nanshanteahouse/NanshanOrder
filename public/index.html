@@ -37,7 +37,7 @@
                 </aside>
 
                 <section class="dishes-grid">
-                    <div v-for="dish in filteredDishes" :key="dish.id" class="dish-card" :class="{ disabled: !isDishAvailable(dish) && !settings.allowOutOfStock, conflict: hasConflict(dish) }">
+                    <div v-for="dish in filteredDishes" :key="dish.id" class="dish-card" :data-dish-id="dish.id" :class="{ disabled: !isDishAvailable(dish) && !settings.allowOutOfStock, conflict: hasConflict(dish) }">
                         <div class="dish-img-placeholder" v-if="!dish.image">{{ getCategoryIcon(dish.categoryName) }}</div>
                         <img v-else :src="'images/' + dish.image" :alt="dish.displayName" @error="handleImageError">
                         <div class="dish-info">
@@ -51,7 +51,7 @@
                                     <span v-if="!isDishAvailable(dish)" class="tag out-of-stock">缺货</span>
                                     <span v-if="hasConflict(dish)" class="tag conflict-tag">含忌口</span>
                                 </div>
-                                <button class="add-btn-circle" :disabled="!isDishAvailable(dish) && !settings.allowOutOfStock" @click="openDishDetail(dish)">+</button>
+                                <button class="add-btn-circle" :disabled="!isDishAvailable(dish) && !settings.allowOutOfStock" @click="openDishDetail(dish, $event)">+</button>
                             </div>
                         </div>
                     </div>
@@ -81,10 +81,32 @@
             </div>
         </div>
 
-        <div class="modal-overlay" v-if="selectedDish" @click.self="selectedDish = null">
-            <div class="modal-content">
-                <div class="modal-header"><h2>{{ selectedDish.displayName }}</h2><button class="close-btn" @click="selectedDish = null">×</button></div>
-                <div class="modal-body">
+        <div class="modal-overlay" v-if="selectedDish"
+             ref="modalOverlayEl"
+             :class="{ visible: animPhase === 'open' || animPhase === 'entering' }"
+             @click.self="closeDishDetail">
+
+            <div class="modal-content dish-detail-modal"
+                 ref="modalContentEl"
+                 :class="{ 'anim-opening': animPhase === 'entering', 'anim-open': animPhase === 'open', 'anim-closing': animPhase === 'exiting' }"
+                 @transitionend="onModalTransitionEnd">
+
+                <div class="modal-dish-image">
+                    <div class="dish-img-placeholder" v-if="!selectedDish.image">{{ getCategoryIcon(selectedDish.categoryName) }}</div>
+                    <img v-else :src="'images/' + selectedDish.image" :alt="selectedDish.displayName" @error="handleImageError">
+                </div>
+
+                <div class="modal-dish-header">
+                    <div class="modal-dish-title">
+                        <h2 class="modal-dish-name">{{ selectedDish.displayName }}</h2>
+                        <span class="modal-dish-price">¥{{ selectedDish.price }}</span>
+                    </div>
+                    <button class="close-btn" @click="closeDishDetail" title="关闭">×</button>
+                </div>
+
+                <p class="modal-dish-desc">{{ selectedDish.description }}</p>
+
+                <div class="modal-dish-detail" :class="{ visible: animPhase === 'open' }">
                     <div class="ingredients-list">
                         <span class="text-sub">主要食材：</span>
                         <span v-for="ing in selectedDish.ingredients" :key="ing" class="ingredient-tag">{{ getIngredientDisplayName(ing) }}</span>
@@ -106,7 +128,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-actions"><button class="action-btn primary full-width" @click="confirmAddToCart">加入购物车 - ¥{{ selectedDish.price }}</button></div>
+
+                <div class="modal-actions" :class="{ visible: animPhase === 'open' }">
+                    <button class="action-btn primary full-width" @click="confirmAddToCart">加入购物车 - ¥{{ selectedDish.price }}</button>
+                </div>
             </div>
         </div>
 

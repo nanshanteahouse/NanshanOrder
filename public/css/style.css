@@ -163,21 +163,139 @@ h3 { font-size: 18px; }
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
     display: flex; align-items: center; justify-content: center; z-index: 200;
+    transition: opacity 0.35s ease;
+}
+.modal-overlay.visible {
+    opacity: 1;
 }
 .modal-content {
     background: var(--bg-surface); padding: 0; border-radius: var(--radius-lg);
     width: 90%; max-width: 480px; box-shadow: var(--shadow-lg); overflow: hidden;
-    animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-@keyframes modalPop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
 .modal-header { padding: var(--space-lg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
 .modal-body { padding: var(--space-lg); max-height: 60vh; overflow-y: auto; }
 .modal-actions { padding: var(--space-md) var(--space-lg); border-top: 1px solid var(--border-color); background: #FAFAFA; display: flex; gap: var(--space-md); }
 .modal-actions.full-width button { width: 100%; }
 
+/* Dish modal: actions fade in after main transition */
+.dish-detail-modal .modal-actions {
+    opacity: 0;
+    transition: opacity 0.35s ease 0.2s;
+    flex-shrink: 0;
+}
+.dish-detail-modal .modal-actions.visible {
+    opacity: 1;
+}
+/* Settings modal: actions always visible */
+.settings-modal .modal-actions {
+    opacity: 1;
+}
+
+/* Dish modal flex layout: keeps the "Add to Cart" button above mobile browser chrome.
+   Only the middle detail section scrolls; image/header/button remain pinned. */
+.dish-detail-modal {
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    max-height: 85dvh;
+}
+
 .close-btn { background: transparent; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer; line-height: 1; padding: 0; }
 .close-btn:hover { color: var(--text-main); }
+
+/* --- 共享元素过渡动画：弹窗菜品详情 --- */
+
+/* 弹窗菜品图片 */
+.modal-dish-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: var(--secondary-color);
+    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+.dish-detail-modal.anim-open .modal-dish-image {
+    height: 250px;
+}
+.modal-dish-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.modal-dish-image .dish-img-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+}
+
+/* 弹窗菜品头部 */
+.modal-dish-header {
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+.modal-dish-title { flex: 1; }
+.modal-dish-name {
+    font-family: "Noto Serif SC", serif;
+    font-size: 20px;
+    margin: 0 0 4px 0;
+}
+.modal-dish-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+/* 弹窗菜品描述 */
+.modal-dish-desc {
+    padding: var(--space-sm) var(--space-lg);
+    color: var(--text-sub);
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.6;
+    flex-shrink: 0;
+}
+
+/* 弹窗详情区域（食材+口味）淡入 */
+.modal-dish-detail {
+    padding: var(--space-lg);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.35s ease 0.15s, transform 0.35s ease 0.15s;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+.modal-dish-detail.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 过渡阶段：进入时锁定图片为卡片尺寸，隐藏详情 */
+.dish-detail-modal.anim-opening .modal-dish-image {
+    height: 200px;
+    transition: none;
+}
+.dish-detail-modal.anim-opening .modal-dish-detail,
+.dish-detail-modal.anim-opening .modal-actions {
+    opacity: 0;
+    transition: none;
+}
+
+/* 设置弹窗保留入场动画 */
+.settings-modal {
+    animation: settingsPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes settingsPop {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
 
 /* 弹窗：菜品详情与口味 */
 .ingredients-list { margin-bottom: var(--space-lg); display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; font-size: 14px; }
@@ -513,6 +631,10 @@ h3 { font-size: 18px; }
     background-color: rgba(231, 76, 60, 0.15);
 }
 
+[data-theme="dark"] .modal-dish-image {
+    background: var(--secondary-color);
+}
+
 [data-theme="dark"] .ingredient-selector {
     background: #1A1A1A;
 }
@@ -562,7 +684,7 @@ h3 { font-size: 18px; }
     .cart-sidebar { width: 100%; max-width: 100%; right: -100%; } 
     
     /* 弹窗与表单优化 */
-    .modal-content { width: 95%; padding: 0; max-height: 90vh; }
+    .modal-content { width: 95%; padding: 0; max-height: 90vh; max-height: 90dvh; }
     .modal-body, .admin-modal-body { padding: 16px; }
     .form-grid { grid-template-columns: 1fr; gap: 12px; } /* 后台表单强制单列 */
     .row-group { flex-direction: column; gap: 12px; }
@@ -570,6 +692,19 @@ h3 { font-size: 18px; }
     /* 口味胶囊在手机上缩小间距 */
     .flavor-pills { gap: 6px; }
     .pill-btn { padding: 6px 12px; font-size: 13px; }
+
+    /* 移动端弹窗适配：预留浏览器底部导航栏空间 */
+    .dish-detail-modal {
+        max-height: 82vh;
+        max-height: 82dvh;
+        padding-bottom: env(safe-area-inset-bottom, 12px);
+    }
+    .modal-dish-image { height: 100px; }
+    .dish-detail-modal.anim-open .modal-dish-image { height: 150px; }
+    .dish-detail-modal.anim-opening .modal-dish-image { height: 100px; }
+    .modal-dish-name { font-size: 18px; }
+    .modal-dish-price { font-size: 16px; }
+    .modal-dish-detail { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
 }
 
 /* --- Toast 提示 --- */

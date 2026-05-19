@@ -1,4 +1,4 @@
-const { createApp, ref, computed, onMounted, watch, onUnmounted } = Vue;
+const { createApp, ref, computed, onMounted, watch, onUnmounted, nextTick } = Vue;
 
 createApp({
     setup() {
@@ -19,6 +19,10 @@ createApp({
         const cartRemark = ref('');
         const selectedDish = ref(null);
         const currentDishFlavors = ref({});
+        const animPhase = ref('idle'); // 'idle' | 'entering' | 'open' | 'exiting'
+        const cardRect = ref(null); // { left, top, width, height }
+        const modalContentEl = ref(null);
+        const modalOverlayEl = ref(null);
 
         const settings = ref({ allowOutOfStock: true, allowFlavorConflict: false, dislikedTags: [] });
 
@@ -143,11 +147,20 @@ createApp({
 
         const formatFlavor = val => Array.isArray(val) ? (val.length === 0 ? '无' : val.join('、')) : val;
 
-        const openDishDetail = (dish) => {
+        const openDishDetail = (dish, event) => {
+            // Guard against rapid double-click
+            if (animPhase.value !== 'idle') return;
+
             if (hasConflict(dish) && !settings.value.allowFlavorConflict) {
                 if(!confirm("该菜品包含您的忌口食材，是否仍要查看？")) return;
             }
-            selectedDish.value = dish;
+
+            // Capture the card element's position
+            const cardEl = event.currentTarget.closest('.dish-card');
+            if (cardEl) {
+                cardRect.value = cardEl.getBoundingClientRect();
+            }
+
             let defaultFlavors = {};
             for (let key in dish.flavorOptions) {
                 const fType = getFlavorType(key);
@@ -155,11 +168,126 @@ createApp({
                 defaultFlavors[key] = fType === 'multiple' ? (Array.isArray(mappingDefault) ? [...mappingDefault] : []) : mappingDefault;
             }
             currentDishFlavors.value = defaultFlavors;
+
+            selectedDish.value = dish;
+            animPhase.value = 'entering';
+
+            nextTick(() => {
+                const content = modalContentEl.value;
+                const overlay = modalOverlayEl.value;
+                if (!content || !overlay) return;
+
+                if (cardRect.value) {
+                    const modalRect = content.getBoundingClientRect();
+                    const cardCX = cardRect.value.left + cardRect.value.width / 2;
+                    const cardCY = cardRect.value.top + cardRect.value.height / 2;
+                    const modalCX = modalRect.left + modalRect.width / 2;
+                    const modalCY = modalRect.top + modalRect.height / 2;
+                    const scaleX = cardRect.value.width / modalRect.width;
+                    const scaleY = cardRect.value.height / modalRect.height;
+
+                    content.style.transition = 'none';
+                    content.style.transform = `translate(${cardCX - modalCX}px, ${cardCY - modalCY}px) scale(${scaleX}, ${scaleY})`;
+                    content.style.opacity = '0';
+                    overlay.style.opacity = '0';
+
+                    content.getBoundingClientRect();
+                }
+
+                requestAnimationFrame(() => {
+                    content.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease';
+                    content.style.transform = 'translate(0, 0) scale(1)';
+                    content.style.opacity = '1';
+                    overlay.style.transition = 'opacity 0.35s ease';
+                    overlay.style.opacity = '1';
+
+                    setTimeout(() => {
+                        if (animPhase.value === 'entering') {
+                            animPhase.value = 'open';
+                            content.style.transition = '';
+                            content.style.transform = '';
+                            content.style.opacity = '';
+                            overlay.style.transition = '';
+                            overlay.style.opacity = '';
+                        }
+                    }, 550);
+                });
+            });
+        };
+
+        const closeDishDetail = () => {
+            if (animPhase.value !== 'open') return;
+            animPhase.value = 'exiting';
+
+            const content = modalContentEl.value;
+            const overlay = modalOverlayEl.value;
+            if (!content || !overlay) {
+                selectedDish.value = null;
+                animPhase.value = 'idle';
+                cardRect.value = null;
+                return;
+            }
+
+            let targetRect = null;
+            if (selectedDish.value) {
+                const cardEl = document.querySelector(`.dish-card[data-dish-id="${selectedDish.value.id}"]`);
+                if (cardEl) {
+                    targetRect = cardEl.getBoundingClientRect();
+                    if (targetRect.top < -200 || targetRect.bottom > window.innerHeight + 200) {
+                        targetRect = null;
+                    }
+                }
+            }
+
+            if (targetRect) {
+                const modalRect = content.getBoundingClientRect();
+                const cardCX = targetRect.left + targetRect.width / 2;
+                const cardCY = targetRect.top + targetRect.height / 2;
+                const modalCX = modalRect.left + modalRect.width / 2;
+                const modalCY = modalRect.top + modalRect.height / 2;
+                const scaleX = targetRect.width / modalRect.width;
+                const scaleY = targetRect.height / modalRect.height;
+
+                content.style.transition = 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease';
+                content.style.transform = `translate(${cardCX - modalCX}px, ${cardCY - modalCY}px) scale(${scaleX}, ${scaleY})`;
+                content.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.35s ease';
+                overlay.style.opacity = '0';
+            } else {
+                content.style.transition = 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease';
+                content.style.transform = 'scale(0.9)';
+                content.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.3s ease';
+                overlay.style.opacity = '0';
+            }
+        };
+
+        const onModalTransitionEnd = (e) => {
+            if (animPhase.value !== 'exiting') return;
+            if (e.target !== modalContentEl.value) return;
+            if (e.propertyName !== 'transform') return;
+
+            selectedDish.value = null;
+            cardRect.value = null;
+            animPhase.value = 'idle';
+
+            const content = modalContentEl.value;
+            if (content) {
+                content.style.transition = '';
+                content.style.transform = '';
+                content.style.opacity = '';
+            }
+            const overlay = modalOverlayEl.value;
+            if (overlay) {
+                overlay.style.transition = '';
+                overlay.style.opacity = '';
+            }
         };
 
         const confirmAddToCart = () => {
+            if (animPhase.value !== 'open') return;
             cart.value.push({ dish: selectedDish.value, flavors: { ...currentDishFlavors.value }, quantity: 1 });
-            selectedDish.value = null;
+            closeDishDetail();
         };
 
         const toggleCart = () => isCartOpen.value = !isCartOpen.value;
@@ -225,7 +353,9 @@ createApp({
             toggleTwoOption, toggleMultiple, isDishAvailable, hasConflict, cartHasConflict,
             isSettingsOpen, toggleSettings, saveSettings, cart, cartRemark, isCartOpen, toggleCart, updateCartQuantity, cartTotalItems, cartTotalPrice,
             selectedDish, currentDishFlavors, openDishDetail, confirmAddToCart, checkout, handleImageError,
-            toastMsg, toastVisible
+            toastMsg, toastVisible,
+            animPhase, cardRect, modalContentEl, modalOverlayEl,
+            closeDishDetail, onModalTransitionEnd
         };
     }
 }).mount('#app');
