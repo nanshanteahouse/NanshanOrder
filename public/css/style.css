@@ -101,6 +101,109 @@ h3 { font-size: 18px; }
     font-size: 12px;
 }
 
+/* 忌口设置按钮 */
+.pref-btn-wrapper {
+    position: relative;
+}
+.pref-btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #FFF5F5;
+    padding: 8px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--danger-color);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--danger-color);
+    transition: background 0.2s, transform 0.2s, box-shadow 0.4s;
+    user-select: none;
+    white-space: nowrap;
+}
+.pref-btn:hover {
+    background: #FFEBEE;
+    transform: scale(1.02);
+}
+.pref-label { font-size: 14px; }
+.pref-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--danger-color);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.pref-btn.first-visit {
+    animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+/* 引导气泡 */
+.tour-bubble {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    z-index: 180;
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 18px 22px;
+    min-width: 290px;
+    max-width: 340px;
+    font-size: 14px;
+    line-height: 1.7;
+    border: 1px solid var(--border-color);
+}
+.tour-bubble::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 50px;
+    width: 16px;
+    height: 16px;
+    background: var(--bg-surface);
+    transform: rotate(45deg);
+    border-top: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+}
+.tour-bubble-content { position: relative; }
+.tour-bubble-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin: 0 0 4px 0;
+    color: var(--text-main);
+}
+.tour-bubble-sub {
+    margin: 0 0 10px 0;
+    color: var(--text-sub);
+}
+.tour-bubble-list {
+    padding: 0;
+    list-style: none;
+    margin: 0 0 14px 0;
+}
+.tour-bubble-list li {
+    padding: 3px 0;
+    color: var(--text-main);
+    font-size: 14px;
+}
+.tour-bubble-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+.tour-confirm-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.tour-confirm-btn:hover { background: var(--primary-light); }
+
 /* 主布局 */
 .main-content { padding: var(--space-lg); max-width: 1200px; margin: 0 auto; }
 .menu-view { display: grid; grid-template-columns: 180px 1fr; gap: var(--space-xl); }
@@ -705,6 +808,24 @@ h3 { font-size: 18px; }
     .modal-dish-name { font-size: 18px; }
     .modal-dish-price { font-size: 16px; }
     .modal-dish-detail { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+
+    /* 移动端引导气泡居中定位 */
+    .tour-bubble {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 250px;
+        max-width: 300px;
+    }
+    .tour-bubble::before {
+        right: auto;
+        left: 50%;
+        margin-left: -8px;
+    }
+
+    /* 移动端忌口按钮紧凑化 */
+    .pref-btn { padding: 6px 12px; font-size: 13px; }
+    .pref-label { font-size: 13px; }
 }
 
 /* --- Toast 提示 --- */
@@ -732,4 +853,9 @@ h3 { font-size: 18px; }
 
 @media (max-width: 768px) {
     .toast { top: 100px; font-size: 14px; padding: 10px 20px; }
+}
+
+@keyframes gentle-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.3); }
+    50% { box-shadow: 0 0 0 8px rgba(211, 47, 47, 0); }
 }

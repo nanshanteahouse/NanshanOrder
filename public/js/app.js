@@ -4,7 +4,7 @@ createApp({
     setup() {
         const isCartOpen = ref(false);
         const isSettingsOpen = ref(false);
-        const isDarkMode = ref(false);
+        const themeMode = ref('auto');
         const isMobile = ref(window.innerWidth <= 768); 
         
         const dishes = ref([]);
@@ -29,6 +29,13 @@ createApp({
         const toastMsg = ref('');
         const toastVisible = ref(false);
         let toastTimer = null;
+
+        const showAdminLink = ref(false);
+        let logoClicks = 0;
+        let logoClickTimer = null;
+        let adminHideTimer = null;
+
+        const tourActive = ref(false);
         const showToast = (msg, duration = 2500) => {
             toastMsg.value = msg;
             toastVisible.value = true;
@@ -38,17 +45,39 @@ createApp({
 
         const updateDeviceType = () => { isMobile.value = window.innerWidth <= 768; };
 
-        const initTheme = () => {
-            const savedTheme = localStorage.getItem('nanshanTheme');
-            if (savedTheme) { isDarkMode.value = savedTheme === 'dark'; } 
-            else { isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches; }
-            document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light');
+        const getEffectiveTheme = () => {
+            if (themeMode.value === 'auto') {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            return themeMode.value;
         };
 
+        const applyTheme = () => {
+            document.documentElement.setAttribute('data-theme', getEffectiveTheme());
+        };
+
+        const initTheme = () => {
+            const saved = localStorage.getItem('nanshanTheme');
+            if (saved === 'dark' || saved === 'light' || saved === 'auto') {
+                themeMode.value = saved;
+            } else {
+                themeMode.value = 'auto';
+            }
+            applyTheme();
+        };
+
+        const themeTitle = computed(() => {
+            if (themeMode.value === 'auto') return '跟随系统 · 点击切换日间模式';
+            if (themeMode.value === 'light') return '日间模式 · 点击切换夜间模式';
+            return '夜间模式 · 点击切换跟随系统';
+        });
+
         const toggleTheme = () => {
-            isDarkMode.value = !isDarkMode.value;
-            document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light');
-            localStorage.setItem('nanshanTheme', isDarkMode.value ? 'dark' : 'light');
+            if (themeMode.value === 'auto') themeMode.value = 'light';
+            else if (themeMode.value === 'light') themeMode.value = 'dark';
+            else themeMode.value = 'auto';
+            applyTheme();
+            localStorage.setItem('nanshanTheme', themeMode.value);
         };
 
         const loadData = async () => {
@@ -77,13 +106,14 @@ createApp({
         onMounted(() => {
             initTheme();
             window.addEventListener('resize', updateDeviceType);
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                if (!localStorage.getItem('nanshanTheme')) {
-                    isDarkMode.value = e.matches;
-                    document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light');
-                }
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (themeMode.value === 'auto') applyTheme();
             });
             loadData();
+
+            if (!localStorage.getItem('nanshanTourDone')) {
+                nextTick(() => { tourActive.value = true; });
+            }
         });
         
         onUnmounted(() => { window.removeEventListener('resize', updateDeviceType); });
@@ -126,10 +156,31 @@ createApp({
 
         const cartHasConflict = computed(() => cart.value.some(item => hasConflict(item.dish)));
 
-        const toggleSettings = () => isSettingsOpen.value = !isSettingsOpen.value;
+        const toggleSettings = () => {
+            if (tourActive.value) dismissTour();
+            isSettingsOpen.value = !isSettingsOpen.value;
+        };
         const saveSettings = () => {
             isSettingsOpen.value = false;
             if (cartHasConflict.value && !settings.value.allowFlavorConflict) isCartOpen.value = true;
+        };
+
+        const onLogoClick = () => {
+            logoClicks++;
+            if (logoClickTimer) clearTimeout(logoClickTimer);
+            if (logoClicks >= 3) {
+                showAdminLink.value = true;
+                logoClicks = 0;
+                if (adminHideTimer) clearTimeout(adminHideTimer);
+                adminHideTimer = setTimeout(() => { showAdminLink.value = false; }, 5000);
+            } else {
+                logoClickTimer = setTimeout(() => { logoClicks = 0; }, 800);
+            }
+        };
+
+        const dismissTour = () => {
+            tourActive.value = false;
+            localStorage.setItem('nanshanTourDone', '1');
         };
 
         const toggleTwoOption = flavorKey => {
@@ -347,7 +398,9 @@ createApp({
         const handleImageError = e => { e.target.style.display = 'none'; e.target.outerHTML = '<div class="dish-img-placeholder">🍽️</div>'; };
 
         return {
-            isDarkMode, toggleTheme, isMobile,
+            themeMode, themeTitle, toggleTheme, isMobile,
+            showAdminLink, onLogoClick,
+            tourActive, dismissTour,
             categories, ingredientMappings, settings, selectedCategory, filteredDishes,
             getCategoryIcon, getIngredientDisplayName, getFlavorDisplayName, getFlavorOptionsList, getFlavorType, formatFlavor,
             toggleTwoOption, toggleMultiple, isDishAvailable, hasConflict, cartHasConflict,

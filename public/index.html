@@ -13,13 +13,34 @@
 <body>
     <div id="app" v-cloak>
         <header class="navbar">
-            <div class="logo"><h1>家庭点菜系统</h1></div>
+            <div class="logo" @click="onLogoClick"><h1>家庭点菜系统</h1></div>
             <div class="header-actions">
-                <div class="icon-btn" @click="toggleTheme" :title="isDarkMode ? '切换日间模式' : '切换夜间模式'">
-                    {{ isDarkMode ? '🌙' : '☀️' }}
+                <div class="icon-btn" @click="toggleTheme" :title="themeTitle">
+                    <span v-if="themeMode === 'auto'" class="theme-auto-icon">💻</span>
+                    <span v-else>{{ themeMode === 'dark' ? '🌙' : '☀️' }}</span>
                 </div>
-                <a href="/admin.html" class="icon-btn" title="后台管理">🔧</a>
-                <div class="icon-btn" @click="toggleSettings" title="偏好设置">⚙️</div>
+                <div class="pref-btn-wrapper">
+                    <div class="pref-btn" :class="{ 'first-visit': tourActive }" @click="toggleSettings">
+                        <span>🚫</span>
+                        <span class="pref-label">忌口设置</span>
+                        <span v-if="settings.dislikedTags.length > 0" class="pref-dot"></span>
+                    </div>
+                    <div v-if="tourActive" class="tour-bubble">
+                        <div class="tour-bubble-content">
+                            <p class="tour-bubble-title">💡 第一次使用？</p>
+                            <p class="tour-bubble-sub">在这里设置饮食忌口，系统会自动：</p>
+                            <ul class="tour-bubble-list">
+                                <li>🔍 检测含忌口的菜品</li>
+                                <li>⚠️ 在卡片上标记「含忌口」</li>
+                                <li>🚫 阻止误加到购物车</li>
+                            </ul>
+                            <div class="tour-bubble-actions">
+                                <button class="tour-confirm-btn" @click="dismissTour">知道了 ✓</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a v-if="showAdminLink" href="/admin.html" class="icon-btn" title="后台管理">⚙️</a>
                 <div class="cart-toggle" @click="toggleCart">
                     🛒 购物车 <span class="badge" v-if="cartTotalItems > 0">{{ cartTotalItems }}</span>
                 </div>
