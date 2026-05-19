@@ -136,6 +136,8 @@
                 <button class="checkout-btn" :disabled="cartHasConflict && !settings.allowFlavorConflict" @click="checkout">提交订单 / 复制信息</button>
             </div>
         </div>
+
+        <div class="toast" :class="{ show: toastVisible }">{{ toastMsg }}</div>
     </div>
     <script src="js/app.js"></script>
 </body>

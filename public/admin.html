@@ -167,6 +167,8 @@
                                 <template v-else-if="col.type === 'array'"><span style="font-size: 12px; color: var(--admin-text-sub);">{{ item[col.key] && item[col.key].length > 0 ? item[col.key].join(', ') : '无' }}</span></template>
                                 <template v-else-if="col.type === 'json'"><span style="font-size: 12px; color: var(--admin-text-sub);">{{ Object.keys(item[col.key] || {}).length }} 项配置</span></template>
                                 <template v-else-if="col.type === 'computed_ing_name'"><strong>{{ getIngredientDisplayName(item.name) }}</strong></template>
+                                <template v-else-if="col.type === 'orderItems'"><span style="font-size: 12px; color: var(--admin-text-sub);">{{ getOrderItemsSummary(item.items) }}</span></template>
+                                <template v-else-if="col.type === 'orderStatus'"><span class="status-pill" :class="getOrderStatusInfo(item.status).class">{{ getOrderStatusInfo(item.status).text }}</span></template>
                                 <template v-else><strong v-if="col.key === 'displayName' || col.key === 'id' || col.key === 'name'">{{ item[col.key] }}</strong><span v-else>{{ item[col.key] }}</span></template>
                             </td>
                             <td><button class="action-btn secondary" style="padding: 4px 10px; font-size: 12px;" @click="openEditModal(item)">编辑</button></td>
@@ -194,6 +196,9 @@
                             </select>
                             <select v-else-if="field.type === 'flavorTypeSelect'" class="modern-select" v-model="editingItem[field.key]">
                                 <option value="single">单选 (single)</option><option value="multiple">多选 (multiple)</option>
+                            </select>
+                            <select v-else-if="field.type === 'orderStatusSelect'" class="modern-select" v-model="editingItem[field.key]">
+                                <option value="pending">待处理</option><option value="completed">已完成</option><option value="cancelled">已取消</option>
                             </select>
                             <div v-else-if="field.type === 'ingredientMultiSelect'" class="ingredient-selector">
                                 <label v-for="ing in db.ingredients" :key="ing.name" class="ingredient-label">

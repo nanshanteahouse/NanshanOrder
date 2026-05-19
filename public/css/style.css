@@ -563,3 +563,30 @@ h3 { font-size: 18px; }
     .flavor-pills { gap: 6px; }
     .pill-btn { padding: 6px 12px; font-size: 13px; }
 }
+
+/* --- Toast 提示 --- */
+.toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--text-main);
+    color: var(--bg-surface);
+    padding: 12px 28px;
+    border-radius: var(--radius-full);
+    font-size: 15px;
+    font-weight: 500;
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: var(--shadow-lg);
+}
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 768px) {
+    .toast { top: 100px; font-size: 14px; padding: 10px 20px; }
+}

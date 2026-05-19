@@ -7,10 +7,10 @@ createApp({
         const isDarkMode = ref(false); 
         const isMobile = ref(window.innerWidth <= 768); // 响应式状态侦听
 
-        const db = ref({ dishes: [], inventory: [], ingredients: [], categories: [], flavorOptions: [], ingredientMapping: [] });
+        const db = ref({ dishes: [], inventory: [], ingredients: [], categories: [], flavorOptions: [], ingredientMapping: [], orders: [] });
         const filters = ref({
             dishes: { search: '', category: '', ingredient: '' }, inventory: { search: '', tag: '', status: '' },
-            ingredients: { search: '', tag: '' }, categories: { search: '' }, flavorOptions: { search: '' }, ingredientMapping: { search: '' }
+            ingredients: { search: '', tag: '' }, categories: { search: '' }, flavorOptions: { search: '' }, ingredientMapping: { search: '' }, orders: { search: '' }
         });
         const selectedItems = ref([]);
 
@@ -66,6 +66,21 @@ createApp({
                 columns: [{ key: 'tag', label: '标签' }, { key: 'displayName', label: '名称' }, { key: 'relatedIngredients', label: '波及食材', type: 'array' }],
                 formFields: [{ key: 'tag', label: '标签', type: 'text', required: true }, { key: 'displayName', label: '名称', type: 'text', required: true }, { key: 'relatedIngredients', label: '波及食材', type: 'ingredientMultiSelect', fullWidth: true }],
                 emptyTemplate: () => ({ tag: '', displayName: '', relatedIngredients: [] })
+            },
+            {
+                id: 'orders', name: '订单', icon: '📋', title: '订单历史',
+                columns: [
+                    { key: 'id', label: '订单号', width: '160px' },
+                    { key: 'createdAt', label: '提交时间', width: '160px' },
+                    { key: 'items', label: '菜品', type: 'orderItems' },
+                    { key: 'totalPrice', label: '金额', width: '80px' },
+                    { key: 'status', label: '状态', type: 'orderStatus', width: '100px' },
+                    { key: 'remark', label: '备注' }
+                ],
+                formFields: [
+                    { key: 'status', label: '状态', type: 'orderStatusSelect', required: true }
+                ],
+                emptyTemplate: () => ({ status: 'pending' })
             }
         ];
 
@@ -77,11 +92,13 @@ createApp({
                 const results = await Promise.all([
                     fetch('data/dishes.json').then(r => r.json()), fetch('data/inventory.json').then(r => r.json()),
                     fetch('data/ingredients.json').then(r => r.json()), fetch('data/categories.json').then(r => r.json()),
-                    fetch('data/flavorOptionsMapping.json').then(r => r.json()), fetch('data/ingredientMapping.json').then(r => r.json())
+                    fetch('data/flavorOptionsMapping.json').then(r => r.json()), fetch('data/ingredientMapping.json').then(r => r.json()),
+                    fetch('data/orders.json').then(r => r.json()).catch(() => ({ orders: [] }))
                 ]);
                 db.value.dishes = results[0].dishes || []; db.value.inventory = results[1].inventory || [];
                 db.value.ingredients = results[2].ingredients || []; db.value.categories = results[3].categories || [];
                 db.value.flavorOptions = results[4].flavorOptions || []; db.value.ingredientMapping = results[5].ingredientMappings || [];
+                db.value.orders = results[6].orders || [];
                 setTimeout(() => { isDirty.value = false; }, 100);
             } catch (err) { alert("读取失败，请确保服务正常！\n" + err.message); }
         };
@@ -105,7 +122,8 @@ createApp({
         const saveToServer = async () => {
             const filesToSave = [
                 { file: 'dishes.json', key: 'dishes' }, { file: 'inventory.json', key: 'inventory' }, { file: 'ingredients.json', key: 'ingredients' },
-                { file: 'categories.json', key: 'categories' }, { file: 'flavorOptionsMapping.json', key: 'flavorOptions' }, { file: 'ingredientMapping.json', key: 'ingredientMapping', exportKey: 'ingredientMappings' }
+                { file: 'categories.json', key: 'categories' }, { file: 'flavorOptionsMapping.json', key: 'flavorOptions' }, { file: 'ingredientMapping.json', key: 'ingredientMapping', exportKey: 'ingredientMappings' },
+                { file: 'orders.json', key: 'orders' }
             ];
             let successCount = 0;
             for (let item of filesToSave) {
@@ -124,6 +142,15 @@ createApp({
             if (item.quantity <= 0) return { key: 'danger', text: '已售罄', class: 'danger' };
             if (item.quantity <= item.threshold) return { key: 'warn', text: '需补货', class: 'warn' };
             return { key: 'good', text: '充足', class: 'good' };
+        };
+
+        const getOrderItemsSummary = (items) => {
+            if (!items || items.length === 0) return '无';
+            return items.map(i => `${i.displayName || '?'} x${i.quantity || 1}`).join('、');
+        };
+        const getOrderStatusInfo = (status) => {
+            const map = { pending: { text: '待处理', class: 'warn' }, completed: { text: '已完成', class: 'good' }, cancelled: { text: '已取消', class: 'danger' } };
+            return map[status] || { text: status, class: '' };
         };
 
         const isListFiltered = computed(() => Object.values(filters.value[currentTab.value] || {}).some(val => val !== ''));
@@ -168,7 +195,8 @@ createApp({
         const exportAllJSON = () => {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
                 dishes: db.value.dishes, inventory: db.value.inventory, ingredients: db.value.ingredients,
-                categories: db.value.categories, flavorOptions: db.value.flavorOptions, ingredientMappings: db.value.ingredientMapping
+                categories: db.value.categories, flavorOptions: db.value.flavorOptions, ingredientMappings: db.value.ingredientMapping,
+                orders: db.value.orders
             }, null, 2));
             const a = document.createElement('a'); a.href = dataStr; a.download = `backup_${new Date().getTime()}.json`; a.click();
         };
@@ -182,6 +210,7 @@ createApp({
                     if(imported.dishes) db.value.dishes = imported.dishes; if(imported.inventory) db.value.inventory = imported.inventory;
                     if(imported.ingredients) db.value.ingredients = imported.ingredients; if(imported.categories) db.value.categories = imported.categories;
                     if(imported.flavorOptions) db.value.flavorOptions = imported.flavorOptions; if(imported.ingredientMappings) db.value.ingredientMapping = imported.ingredientMappings;
+                    if(imported.orders) db.value.orders = imported.orders;
                     alert("✅ 导入成功！"); isDirty.value = true;
                 } catch(err) { alert("❌ 格式不合法"); }
             };
@@ -209,7 +238,7 @@ createApp({
             isDarkMode, toggleTheme, isMobile,
             tabs: tabsConfig, currentTab, currentTabObj, db, filters, isListFiltered,
             isDirty, filteredData, ingredientTags, saveToServer, exportAllJSON, importJSON,
-            getInventoryStatus, getIngredientDisplayName, selectedItems, isAllSelected, toggleSelectAll, batchDelete,
+            getInventoryStatus, getIngredientDisplayName, getOrderItemsSummary, getOrderStatusInfo, selectedItems, isAllSelected, toggleSelectAll, batchDelete,
             dragOverIndex, onDragStart, onDragOver, onDrop, isModalOpen, editingItem, openEditModal, closeEditModal, saveModalItem, handleJsonInput
         };
     }

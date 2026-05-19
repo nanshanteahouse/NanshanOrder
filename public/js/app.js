@@ -22,6 +22,16 @@ createApp({
 
         const settings = ref({ allowOutOfStock: true, allowFlavorConflict: false, dislikedTags: [] });
 
+        const toastMsg = ref('');
+        const toastVisible = ref(false);
+        let toastTimer = null;
+        const showToast = (msg, duration = 2500) => {
+            toastMsg.value = msg;
+            toastVisible.value = true;
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { toastVisible.value = false; }, duration);
+        };
+
         const updateDeviceType = () => { isMobile.value = window.innerWidth <= 768; };
 
         const initTheme = () => {
@@ -163,9 +173,9 @@ createApp({
         const cartTotalPrice = computed(() => cart.value.reduce((sum, item) => sum + (item.dish.price * item.quantity), 0));
 
         const checkout = () => {
-            if (cart.value.length === 0) return alert("购物车是空的");
-            if (cartHasConflict.value && !settings.value.allowFlavorConflict) return alert("购物车中存在包含忌口的菜品，无法提交。");
-            
+            if (cart.value.length === 0) return showToast("购物车是空的");
+            if (cartHasConflict.value && !settings.value.allowFlavorConflict) return showToast("购物车中存在忌口菜品，无法提交");
+
             let orderText = `--- 家庭点单 ---\n`;
             if (cartRemark.value.trim()) orderText += `【备注】：${cartRemark.value.trim()}\n---\n`;
 
@@ -175,10 +185,35 @@ createApp({
             });
             orderText += `---\n总计：¥${cartTotalPrice.value}`;
 
-            navigator.clipboard.writeText(orderText).then(() => {
-                alert("已复制到剪贴板！\n\n" + orderText);
-                cart.value = []; cartRemark.value = ''; isCartOpen.value = false;
-            }).catch(() => alert("复制失败"));
+            const orderSnapshot = [...cart.value.map(item => ({
+                dishId: item.dish.id,
+                displayName: item.dish.displayName,
+                price: item.dish.price,
+                quantity: item.quantity,
+                flavors: item.flavors
+            }))];
+            const orderTotal = cartTotalPrice.value;
+            const orderRemark = cartRemark.value.trim();
+
+            cart.value = [];
+            cartRemark.value = '';
+            isCartOpen.value = false;
+
+            fetch('/api/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: orderSnapshot, totalPrice: orderTotal, remark: orderRemark })
+            }).catch(() => {});
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(orderText).then(() => {
+                    showToast('已复制到剪贴板 ✓');
+                }).catch(() => {
+                    showToast('已提交订单');
+                });
+            } else {
+                showToast('已提交订单');
+            }
         };
 
         const handleImageError = e => { e.target.style.display = 'none'; e.target.outerHTML = '<div class="dish-img-placeholder">🍽️</div>'; };
@@ -189,7 +224,8 @@ createApp({
             getCategoryIcon, getIngredientDisplayName, getFlavorDisplayName, getFlavorOptionsList, getFlavorType, formatFlavor,
             toggleTwoOption, toggleMultiple, isDishAvailable, hasConflict, cartHasConflict,
             isSettingsOpen, toggleSettings, saveSettings, cart, cartRemark, isCartOpen, toggleCart, updateCartQuantity, cartTotalItems, cartTotalPrice,
-            selectedDish, currentDishFlavors, openDishDetail, confirmAddToCart, checkout, handleImageError
+            selectedDish, currentDishFlavors, openDishDetail, confirmAddToCart, checkout, handleImageError,
+            toastMsg, toastVisible
         };
     }
 }).mount('#app');

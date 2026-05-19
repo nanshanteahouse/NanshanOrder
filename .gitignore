@@ -3,4 +3,4 @@ node-v24.14.1-win-x64/
 !README.md
 node_modules/
 package-lock.json
-package.json
+*.tmp
