@@ -18,6 +18,7 @@
                 <div class="icon-btn" @click="toggleTheme" :title="isDarkMode ? '切换日间模式' : '切换夜间模式'">
                     {{ isDarkMode ? '🌙' : '☀️' }}
                 </div>
+                <a href="/admin.html" class="icon-btn" title="后台管理">🔧</a>
                 <div class="icon-btn" @click="toggleSettings" title="偏好设置">⚙️</div>
                 <div class="cart-toggle" @click="toggleCart">
                     🛒 购物车 <span class="badge" v-if="cartTotalItems > 0">{{ cartTotalItems }}</span>
