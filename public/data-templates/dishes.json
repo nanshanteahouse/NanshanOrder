@@ -1,0 +1,376 @@
+{
+  "_schemaVersion": 1,
+  "dishes": [
+    {
+      "id": "stirfry_001",
+      "displayName": "辣椒炒肉",
+      "categoryName": "stirfry",
+      "price": 28,
+      "image": "辣椒炒肉.jpg",
+      "description": "香辣可口的辣椒炒肉，选用新鲜猪肉和青椒爆炒",
+      "ingredients": [
+        "pork",
+        "green_pepper",
+        "red_pepper",
+        "garlic",
+        "salt",
+        "soy_sauce",
+        "oil"
+      ],
+      "flavorOptions": {
+        "spicyLevel": {
+          "default": "微辣"
+        },
+        "greenOnion": {
+          "default": "加"
+        },
+        "cilantro": {
+          "default": "不加"
+        }
+      }
+    },
+    {
+      "id": "stirfry_002",
+      "displayName": "番茄炒蛋",
+      "categoryName": "stirfry",
+      "price": 18,
+      "image": "番茄炒蛋.jpg",
+      "description": "经典家常菜，酸甜可口",
+      "ingredients": [
+        "egg",
+        "tomato",
+        "salt",
+        "sucrose",
+        "oil"
+      ],
+      "flavorOptions": {
+        "greenOnion": {
+          "default": "加"
+        }
+      }
+    },
+    {
+      "id": "stirfry_003",
+      "displayName": "土豆丝炒肉",
+      "categoryName": "stirfry",
+      "price": 22,
+      "image": "土豆丝炒肉.jpg",
+      "description": "脆爽可口的土豆丝配以肉丝",
+      "ingredients": [
+        "pork",
+        "potato",
+        "red_pepper",
+        "garlic",
+        "salt",
+        "soy_sauce",
+        "vinegar"
+      ],
+      "flavorOptions": {
+        "spicyLevel": {
+          "default": "微辣"
+        },
+        "greenOnion": {
+          "default": "加"
+        }
+      }
+    },
+    {
+      "id": "stirfry_004",
+      "displayName": "蒜蓉西兰花",
+      "categoryName": "stirfry",
+      "price": 16,
+      "image": "蒜蓉西兰花.jpg",
+      "description": "健康蔬菜，清爽脆嫩",
+      "ingredients": [
+        "broccoli",
+        "garlic",
+        "salt",
+        "oil"
+      ],
+      "flavorOptions": {}
+    },
+    {
+      "id": "stirfry_005",
+      "displayName": "宫保鸡丁",
+      "categoryName": "stirfry",
+      "price": 32,
+      "image": "宫保鸡丁.jpg",
+      "description": "经典川菜，鸡肉嫩滑，花生香脆",
+      "ingredients": [
+        "chicken",
+        "peanut",
+        "chili",
+        "garlic",
+        "soy_sauce",
+        "sucrose",
+        "oil"
+      ],
+      "flavorOptions": {
+        "spicyLevel": {
+          "default": "微辣"
+        },
+        "greenOnion": {
+          "default": "加"
+        },
+        "cilantro": {
+          "default": "不加"
+        }
+      }
+    },
+    {
+      "id": "stirfry_006",
+      "displayName": "红烧牛肉",
+      "categoryName": "stirfry",
+      "price": 45,
+      "image": "红烧牛肉.jpg",
+      "description": "软烂入味，酱香浓郁",
+      "ingredients": [
+        "beef",
+        "potato",
+        "carrot",
+        "soy_sauce",
+        "sucrose",
+        "garlic",
+        "ginger"
+      ],
+      "flavorOptions": {
+        "spicyLevel": {
+          "default": "微辣"
+        },
+        "greenOnion": {
+          "default": "加"
+        }
+      }
+    },
+    {
+      "id": "stirfry_007",
+      "displayName": "红烧肉",
+      "categoryName": "stirfry",
+      "price": 38,
+      "image": "红烧肉.jpg",
+      "description": "肥而不腻，入口即化",
+      "ingredients": [
+        "pork_belly",
+        "soy_sauce",
+        "sucrose",
+        "ginger",
+        "green_onion"
+      ],
+      "flavorOptions": {
+        "spicyLevel": {
+          "default": "不辣"
+        }
+      }
+    },
+    {
+      "id": "soup_001",
+      "displayName": "玉米排骨汤",
+      "categoryName": "soup",
+      "price": 38,
+      "image": "玉米排骨汤.jpg",
+      "description": "清甜滋补，汤鲜味美",
+      "ingredients": [
+        "pork",
+        "corn",
+        "carrot",
+        "salt",
+        "ginger"
+      ],
+      "flavorOptions": {
+        "temperature": {
+          "default": "热"
+        },
+        "greenOnion": {
+          "default": "加"
+        },
+        "cilantro": {
+          "default": "不加"
+        }
+      }
+    },
+    {
+      "id": "soup_002",
+      "displayName": "番茄蛋汤",
+      "categoryName": "soup",
+      "price": 15,
+      "image": "番茄蛋汤.jpg",
+      "description": "酸甜开胃，简单美味",
+      "ingredients": [
+        "egg",
+        "tomato",
+        "salt",
+        "green_onion"
+      ],
+      "flavorOptions": {
+        "temperature": {
+          "default": "热"
+        },
+        "greenOnion": {
+          "default": "加"
+        }
+      }
+    },
+    {
+      "id": "soup_003",
+      "displayName": "紫菜蛋花汤",
+      "categoryName": "soup",
+      "price": 12,
+      "image": "紫菜蛋花汤.jpg",
+      "description": "清淡爽口，营养丰富",
+      "ingredients": [
+        "egg",
+        "seaweed",
+        "salt",
+        "sesame_oil"
+      ],
+      "flavorOptions": {
+        "temperature": {
+          "default": "热"
+        },
+        "greenOnion": {
+          "default": "加"
+        }
+      }
+    },
+    {
+      "id": "beverage_001",
+      "displayName": "珍珠奶茶",
+      "categoryName": "beverage",
+      "price": 15,
+      "image": "珍珠奶茶.jpg",
+      "description": "香浓奶茶配 Q 弹珍珠",
+      "ingredients": [
+        "milk",
+        "tea",
+        "sucrose",
+        "bubbles"
+      ],
+      "flavorOptions": {
+        "sweetness": {
+          "default": "七分"
+        },
+        "iceLevel": {
+          "default": "正常冰"
+        }
+      }
+    },
+    {
+      "id": "beverage_002",
+      "displayName": "柠檬水",
+      "categoryName": "beverage",
+      "price": 12,
+      "image": "柠檬水.jpg",
+      "description": "清爽解渴，富含维生素 C",
+      "ingredients": [
+        "lemon",
+        "honey",
+        "water"
+      ],
+      "flavorOptions": {
+        "sweetness": {
+          "default": "正常"
+        },
+        "iceLevel": {
+          "default": "多冰"
+        }
+      }
+    },
+    {
+      "id": "beverage_003",
+      "displayName": "橙汁",
+      "categoryName": "beverage",
+      "price": 14,
+      "image": "橙汁.jpg",
+      "description": "鲜榨橙汁，纯天然无添加",
+      "ingredients": [
+        "orange",
+        "water"
+      ],
+      "flavorOptions": {
+        "sweetness": {
+          "default": "正常"
+        },
+        "iceLevel": {
+          "default": "正常冰"
+        }
+      }
+    },
+    {
+      "id": "cold_dish_001",
+      "displayName": "拍黄瓜",
+      "categoryName": "cold_dish",
+      "price": 10,
+      "image": "拍黄瓜.jpg",
+      "description": "清淡爽口，营养丰富",
+      "ingredients": [
+        "cucumber",
+        "soy_sauce",
+        "sucrose",
+        "garlic",
+        "sesame",
+        "sesame_oil",
+        "chili",
+        "salt"
+      ],
+      "flavorOptions": {
+        "spicyLevel": {
+          "default": "微辣"
+        },
+        "cilantro": {
+          "default": "加"
+        }
+      }
+    },
+    {
+      "id": "staple_001",
+      "displayName": "白米饭",
+      "categoryName": "staple",
+      "price": 3,
+      "image": "白米饭.jpg",
+      "description": "颗粒饱满，软糯香甜",
+      "ingredients": [
+        "rice",
+        "water"
+      ],
+      "flavorOptions": {}
+    },
+    {
+      "id": "staple_002",
+      "displayName": "炒面条",
+      "categoryName": "staple",
+      "price": 18,
+      "image": "炒面条.jpg",
+      "description": "筋道爽滑，香气扑鼻",
+      "ingredients": [
+        "noodles",
+        "egg",
+        "cabbage",
+        "carrot",
+        "soy_sauce",
+        "oil"
+      ],
+      "flavorOptions": {
+        "spicyLevel": {
+          "default": "微辣"
+        },
+        "greenOnion": {
+          "default": "加"
+        }
+      }
+    },
+    {
+      "id": "staple_003",
+      "displayName": "馒头",
+      "categoryName": "staple",
+      "price": 2,
+      "image": "馒头.jpg",
+      "description": "松软可口，麦香浓郁",
+      "ingredients": [
+        "flour",
+        "yeast",
+        "water"
+      ],
+      "flavorOptions": {}
+    }
+  ]
+}

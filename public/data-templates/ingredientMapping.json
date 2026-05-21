@@ -1,0 +1,164 @@
+{
+  "_schemaVersion": 1,
+  "ingredientMappings": [
+    {
+      "tag": "gluten",
+      "displayName": "含有麸质的谷物及其制品",
+      "relatedIngredients": [
+        "wheat",
+        "flour",
+        "bread",
+        "noodles",
+        "pasta",
+        "barley",
+        "rye",
+        "oats",
+        "seitan",
+        "semolina",
+        "spelt",
+        "triticale"
+      ]
+    },
+    {
+      "tag": "crustaceans",
+      "displayName": "甲壳纲类动物及其制品",
+      "relatedIngredients": [
+        "shrimp",
+        "prawn",
+        "crab",
+        "lobster",
+        "crayfish",
+        "crawfish"
+      ]
+    },
+    {
+      "tag": "fish",
+      "displayName": "鱼类及其制品",
+      "relatedIngredients": [
+        "fish",
+        "salmon",
+        "tuna",
+        "cod",
+        "anchovy",
+        "sardine",
+        "mackerel",
+        "herring",
+        "tilapia",
+        "bass",
+        "carp",
+        "catfish",
+        "eel"
+      ]
+    },
+    {
+      "tag": "egg",
+      "displayName": "蛋类及其制品",
+      "relatedIngredients": [
+        "egg",
+        "egg_white",
+        "egg_yolk",
+        "mayonnaise",
+        "meringue",
+        "custard",
+        "quail_egg"
+      ]
+    },
+    {
+      "tag": "peanut",
+      "displayName": "花生及其制品",
+      "relatedIngredients": [
+        "peanut",
+        "peanut_butter",
+        "peanut_oil",
+        "groundnut",
+        "peanut_flour"
+      ]
+    },
+    {
+      "tag": "soy",
+      "displayName": "大豆及其制品",
+      "relatedIngredients": [
+        "soybean",
+        "tofu",
+        "soy_milk",
+        "soy_sauce",
+        "edamame",
+        "tempeh",
+        "miso",
+        "natto",
+        "soy_protein",
+        "soy_flour"
+      ]
+    },
+    {
+      "tag": "dairy",
+      "displayName": "乳及乳制品（包括乳糖）",
+      "relatedIngredients": [
+        "milk",
+        "cream",
+        "cheese",
+        "yogurt",
+        "butter",
+        "lactose",
+        "whey",
+        "casein",
+        "ghee",
+        "sour_cream",
+        "cottage_cheese",
+        "ricotta",
+        "cream_cheese",
+        "milk_powder",
+        "condensed_milk",
+        "evaporated_milk"
+      ]
+    },
+    {
+      "tag": "treeNut",
+      "displayName": "坚果及其果仁类制品",
+      "relatedIngredients": [
+        "almond",
+        "walnut",
+        "cashew",
+        "pistachio",
+        "hazelnut",
+        "pecan",
+        "macadamia",
+        "brazilNut",
+        "chestnut",
+        "pineNut",
+        "praline",
+        "marzipan",
+        "nougat"
+      ]
+    },
+    {
+      "tag": "pork",
+      "displayName": "猪肉及其制品",
+      "relatedIngredients": [
+        "pork",
+        "bacon",
+        "ham",
+        "sausage",
+        "pork_belly",
+        "pork_loin",
+        "pork_fat",
+        "lard",
+        "pork_ribs"
+      ]
+    },
+    {
+      "tag": "beef",
+      "displayName": "牛肉及其制品",
+      "relatedIngredients": [
+        "beef",
+        "steak",
+        "ground_beef",
+        "beef_ribs",
+        "brisket",
+        "sirloin",
+        "tenderloin",
+        "veal"
+      ]
+    }
+  ]
+}

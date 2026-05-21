@@ -1,0 +1,82 @@
+{
+  "_schemaVersion": 1,
+  "flavorOptions": [
+    {
+      "name": "spicyLevel",
+      "displayName": "辣度",
+      "type": "single",
+      "options": [
+        "不辣",
+        "微辣",
+        "轻辣",
+        "中辣",
+        "重辣"
+      ]
+    },
+    {
+      "name": "sweetness",
+      "displayName": "甜度",
+      "type": "single",
+      "options": [
+        "正常",
+        "七分",
+        "五分",
+        "三分",
+        "不另外加糖"
+      ]
+    },
+    {
+      "name": "iceLevel",
+      "displayName": "冰量",
+      "type": "single",
+      "options": [
+        "正常冰",
+        "少冰",
+        "去冰",
+        "多冰"
+      ]
+    },
+    {
+      "name": "greenOnion",
+      "displayName": "葱花",
+      "type": "single",
+      "options": [
+        "加",
+        "不加"
+      ]
+    },
+    {
+      "name": "cilantro",
+      "displayName": "香菜",
+      "type": "single",
+      "options": [
+        "加",
+        "不加"
+      ]
+    },
+    {
+      "name": "temperature",
+      "displayName": "温度",
+      "type": "single",
+      "options": [
+        "热",
+        "温",
+        "凉"
+      ]
+    },
+    {
+      "name": "toppings",
+      "displayName": "额外加料 (可多选)",
+      "type": "multiple",
+      "options": [
+        "珍珠",
+        "椰果",
+        "布丁",
+        "红豆",
+        "脆波波"
+      ],
+      "default": [],
+      "maxSelect": 3
+    }
+  ]
+}
