@@ -74,6 +74,17 @@ node server.js
 
 ---
 
+### 5. 数据安全与升级
+
+您的菜品、库存等自定义数据存储在 `public/data/`，该目录**不受 git 跟踪**。
+
+- ✅ **首次运行**：`server.js` 会自动检查数据文件，缺失时从 `data-templates/` 复制默认配置，**无需手动初始化**
+- ✅ **安全升级**：通过 `git pull` 拉取更新时，您已修改的数据文件**不会被覆盖或产生冲突**
+- ✅ **重置默认**：如需恢复出厂设置，只需删除 `public/data/` 目录后重启服务器即可
+- 💡 项目更新可能新增默认字段，后续版本会提供"应用模板更新"的后台功能
+
+---
+
 ## 📁 目录结构
 
 ```text
@@ -86,13 +97,20 @@ node server.js
 ├── js/
 │   ├── app.js             # 前台 Vue 3 业务逻辑
 │   └── admin.js           # 后台 Vue 3 业务逻辑
-├── data/                  # 系统的核心数据库
+├── data/                  # 运行时数据（不受 git 跟踪，更新代码库不会覆盖）
 │   ├── dishes.json        # 菜品清单
 │   ├── inventory.json     # 实时库存数据
 │   ├── ingredients.json   # 食材基础库
 │   ├── categories.json    # 菜品分类目录
 │   ├── flavorOptionsMapping.json # 全局口味预设配置
 │   └── ingredientMapping.json    # 忌口与关联食材映射规则
+├── data-templates/        # 默认模板（git 跟踪，首次运行自动初始化）
+│   ├── categories.json    # 分类默认配置
+│   ├── dishes.json        # 菜品默认配置
+│   ├── flavorOptionsMapping.json # 口味预设默认配置
+│   ├── ingredientMapping.json    # 忌口映射默认配置
+│   ├── ingredients.json   # 食材库默认配置
+│   └── inventory.json     # 库存默认配置
 └── images/                # 存放菜品图片的目录 (文件名需与 dishes.json 对应)
 ```
 
