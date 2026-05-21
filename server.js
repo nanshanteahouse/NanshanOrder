@@ -16,8 +16,29 @@ const ALLOWED_FILES = [
 ];
 
 const DATA_DIR = path.join(__dirname, 'public', 'data');
+const TEMPLATE_DIR = path.join(__dirname, 'public', 'data-templates');
 
 const writeQueues = new Map();
+
+async function ensureDataFiles() {
+    try { await fs.mkdir(DATA_DIR, { recursive: true }); } catch {}
+
+    let initialized = false;
+    for (const file of ALLOWED_FILES) {
+        const target = path.join(DATA_DIR, file);
+        try {
+            await fs.access(target);
+        } catch {
+            const source = path.join(TEMPLATE_DIR, file);
+            if (await fs.access(source).then(() => true).catch(() => false)) {
+                await fs.copyFile(source, target);
+                console.log(`  📄 已初始化 ${file}`);
+                initialized = true;
+            }
+        }
+    }
+    if (initialized) console.log('  ✅ 数据文件初始化完成');
+}
 
 async function atomicWrite(filePath, data) {
     const tmpPath = filePath + '.tmp';
@@ -86,10 +107,16 @@ app.post('/api/order', async (req, res) => {
     }
 });
 
-app.listen(PORT, HOST, () => {
-    console.log(`\n🍽️ 家庭点菜系统已启动！`);
-    console.log(`=================================`);
-    console.log(`📱 【前台点菜】 http://localhost:${PORT}`);
-    console.log(`⚙️  【后台管理】 http://localhost:${PORT}/admin.html`);
-    console.log(`=================================\n`);
+ensureDataFiles().then(() => {
+    app.listen(PORT, HOST, () => {
+        console.log(`\n🍽️ 家庭点菜系统已启动！`);
+        console.log(`=================================`);
+        console.log(`📱 【前台点菜】 http://localhost:${PORT}`);
+        console.log(`⚙️  【后台管理】 http://localhost:${PORT}/admin.html`);
+        console.log(`💡 数据文件存储在 public/data/，更新代码库不会覆盖您的数据`);
+        console.log(`=================================\n`);
+    });
+}).catch(err => {
+    console.error('❌ 数据初始化失败:', err);
+    process.exit(1);
 });
